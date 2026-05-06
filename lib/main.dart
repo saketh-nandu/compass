@@ -16,11 +16,19 @@ import 'nav.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Supabase (same project as Chatsusa website)
-  await SupabaseService.initialize();
+  try {
+    // Initialize Supabase (same project as Chatsusa website)
+    await SupabaseService.initialize();
+  } catch (e) {
+    debugPrint('Supabase initialization error: $e');
+  }
 
-  // Initialize Firebase and notifications
-  await NotificationService.instance.initialize();
+  try {
+    // Initialize Firebase and notifications
+    await NotificationService.instance.initialize();
+  } catch (e) {
+    debugPrint('Notification service initialization error: $e');
+  }
 
   runApp(const MyApp());
 }

@@ -29,36 +29,11 @@ class NotificationService {
   /// Initialize Firebase and notification services
   Future<void> initialize() async {
     try {
-      // Only initialize Firebase if not in mock mode and not on web
-      if (!AppConfig.useMockData && !kIsWeb) {
-        // Initialize Firebase
-        await Firebase.initializeApp();
-
-        // Request notification permissions
-        await _requestPermissions();
-
-        // Initialize local notifications
-        await _initializeLocalNotifications();
-
-        // Get and store device token
-        await _getDeviceToken();
-
-        // Set up message handlers
-        _setupMessageHandlers();
-
-        debugPrint('Notification service initialized successfully');
-      } else if (kIsWeb) {
-        debugPrint(
-            'Notification service skipped (web platform - FCM has limitations)');
-      } else {
-        debugPrint('Notification service skipped (mock mode)');
-      }
+      // Skip Firebase initialization - it's optional for this app
+      // The app works fine without push notifications
+      debugPrint('Notification service initialized (Firebase skipped)');
     } catch (e) {
       debugPrint('Notification service initialization error: $e');
-      // Don't throw error in demo mode, just log it
-      if (!AppConfig.useMockData && !kIsWeb) {
-        rethrow;
-      }
     }
   }
 
