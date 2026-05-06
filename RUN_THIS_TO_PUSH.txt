@@ -1,0 +1,37 @@
+================================================================================
+COMPASS APP - PUSH TO GITHUB
+================================================================================
+
+COPY AND PASTE THIS COMMAND IN POWERSHELL:
+
+.\push-to-github.ps1
+
+OR RUN THIS BATCH FILE:
+
+PUSH_TO_GITHUB.bat
+
+OR USE THIS MANUAL COMMAND:
+
+git push -u origin main
+
+================================================================================
+
+WHEN PROMPTED FOR CREDENTIALS:
+
+Username: saketh-nandu
+Password: [Your Personal Access Token from https://github.com/settings/tokens]
+
+================================================================================
+
+AFTER PUSH COMPLETES:
+
+1. Go to: https://github.com/saketh-nandu/compass
+2. Enable GitHub Actions
+3. Wait for APK build (5-10 minutes)
+4. Download APK from Actions tab
+
+================================================================================
+
+THAT'S IT! Your Compass app will be on GitHub! 🚀
+
+================================================================================
