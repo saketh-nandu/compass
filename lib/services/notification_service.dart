@@ -28,8 +28,15 @@ class NotificationService {
   /// Initialize Firebase and notification services
   Future<void> initialize() async {
     try {
-      // Initialize Firebase
-      await Firebase.initializeApp();
+      // Initialize Firebase (optional - app works without it)
+      try {
+        await Firebase.initializeApp();
+        debugPrint('Firebase initialized successfully');
+      } catch (e) {
+        debugPrint('Firebase initialization skipped: $e');
+        debugPrint('App will work without push notifications');
+        return; // Exit early if Firebase fails
+      }
 
       // Request notification permissions
       await _requestPermissions();
@@ -46,7 +53,7 @@ class NotificationService {
       debugPrint('Notification service initialized successfully');
     } catch (e) {
       debugPrint('Notification service initialization error: $e');
-      // Don't crash the app if Firebase fails
+      // Don't crash the app if notifications fail
     }
   }
 
@@ -108,7 +115,8 @@ class NotificationService {
         _storeDeviceToken();
       });
     } catch (e) {
-      debugPrint('Get device token error: $e');
+      debugPrint('Get device token error (Firebase may not be configured): $e');
+      // Continue without device token
     }
   }
 

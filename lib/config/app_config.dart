@@ -17,6 +17,17 @@ class AppConfig {
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12ZW9jZW1sa3J4ZHZwY2RwdXZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODQyNDgsImV4cCI6MjA5MzY2MDI0OH0.TpbEvmxDUgV3RnGNcGLqtOXff37WnyYYZzKgtTyheTQ';
 
   // ============================================================================
+  // YOUTUBE API CONFIGURATION
+  // ============================================================================
+
+  /// YouTube Data API v3 key for fetching shorts
+  static const String youtubeApiKey = 'AIzaSyC9D5SNyxywyjmCViQIBR7dxTEkQqI-G2U';
+
+  /// YouTube API base URL
+  static const String youtubeApiBaseUrl =
+      'https://www.googleapis.com/youtube/v3';
+
+  // ============================================================================
   // STORAGE BUCKET NAMES (MUST MATCH CHATSUSA WEBSITE)
   // ============================================================================
 
