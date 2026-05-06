@@ -27,34 +27,40 @@ jobs:
           channel: 'stable'
 
       - name: Get dependencies
+        working-directory: ./my_app
         run: flutter pub get
 
       - name: Clean build cache
+        working-directory: ./my_app
         run: flutter clean
 
       - name: Get dependencies again
+        working-directory: ./my_app
         run: flutter pub get
 
       - name: Run analyzer
+        working-directory: ./my_app
         run: flutter analyze
 
       - name: Build APK (Debug)
+        working-directory: ./my_app
         run: flutter build apk --debug
 
       - name: Build APK (Release)
+        working-directory: ./my_app
         run: flutter build apk --release
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: compass-debug.apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          path: my_app/build/app/outputs/flutter-apk/app-debug.apk
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
           name: compass-release.apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: my_app/build/app/outputs/flutter-apk/app-release.apk
 
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/')
@@ -74,6 +80,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/app/outputs/flutter-apk/app-release.apk
+          asset_path: ./my_app/build/app/outputs/flutter-apk/app-release.apk
           asset_name: compass-${{ github.ref }}-release.apk
           asset_content_type: application/vnd.android.package-archive
