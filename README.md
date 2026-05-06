@@ -16,7 +16,13 @@ A sophisticated Flutter application that appears as a legitimate Compass & Level
 - 🔔 **Notifications** - Firebase Cloud Messaging
 - 🛡️ **Security** - PIN protection, auto-lock, panic mode
 
-## 🚀 Quick Start
+## � Build Status
+
+[![Build APK](https://github.com/saketh-nandu/compass/actions/workflows/build-apk.yml/badge.svg)](https://github.com/saketh-nandu/compass/actions/workflows/build-apk.yml)
+
+All Flutter analysis errors fixed ✅
+
+## �🚀 Quick Start
 
 ### Prerequisites
 - Android 5.0+ (API 21+)
