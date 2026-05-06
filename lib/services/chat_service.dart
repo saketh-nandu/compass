@@ -207,23 +207,44 @@ class ChatService {
     }
   }
 
-  /// Get chat users/contacts
-  /// Retrieves users from the same users table as Chatsusa
-  Future<List<ChatUser>> getChatUsers() async {
+  /// Get chat partner (fixed partner from database)
+  Future<String?> getChatPartnerId() async {
     try {
       final currentUser = _client.auth.currentUser;
-      if (currentUser == null) return [];
+      if (currentUser == null) return null;
 
-      // Get users who have exchanged messages with current user
       final response = await _client
           .from('users')
-          .select('id, username, nickname, avatar_url, partner_id, created_at')
-          .neq('id', currentUser.id);
+          .select('partner_id')
+          .eq('id', currentUser.id)
+          .single();
 
-      return response.map((json) => ChatUser.fromJson(json)).toList();
+      return response['partner_id'] as String?;
     } catch (e) {
-      debugPrint('Get chat users error: $e');
-      return [];
+      debugPrint('Get chat partner error: $e');
+      return null;
+    }
+  }
+
+  /// Get chat partner details
+  Future<ChatUser?> getChatPartner() async {
+    try {
+      final currentUser = _client.auth.currentUser;
+      if (currentUser == null) return null;
+
+      final response = await _client.from('users').select('''
+            partner_id,
+            users!users_partner_id_fkey(id, email, display_name, avatar_url, status, last_seen_at)
+          ''').eq('id', currentUser.id).single();
+
+      final partnerData = response['users'];
+      if (partnerData != null) {
+        return ChatUser.fromJson(partnerData);
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Get chat partner details error: $e');
+      return null;
     }
   }
 

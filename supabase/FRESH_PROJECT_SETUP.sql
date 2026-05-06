@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS public.users (
   email TEXT UNIQUE NOT NULL,
   display_name TEXT,
   avatar_url TEXT,
+  partner_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
   status TEXT DEFAULT 'offline' CHECK (status IN ('online', 'offline', 'away')),
   last_seen_at TIMESTAMP WITH TIME ZONE,
   metadata JSONB DEFAULT '{}',
