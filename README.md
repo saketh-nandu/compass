@@ -46,8 +46,7 @@ A sophisticated Flutter application that appears as a legitimate Compass & Level
 
 | Role | Username | Password |
 |------|----------|----------|
-| Male | `saketh_nandu127` | `SupriyaSaketh127` |
-| Female | `srirenu127` | `#filmmaking` |
+|
 
 ## 🔓 Unlock Hidden Chat
 
