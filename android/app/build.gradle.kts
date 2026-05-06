@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
-    // Temporarily disable Firebase for testing
-    // id("com.google.gms.google-services")
+    id("com.google.gms.google-services")
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
@@ -43,15 +42,14 @@ android {
     }
 }
 dependencies {
-  // Temporarily disable Firebase dependencies for testing
   // Import the Firebase BoM
-  // implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
+  implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
 
   // Firebase Analytics
-  // implementation("com.google.firebase:firebase-analytics")
+  implementation("com.google.firebase:firebase-analytics")
   
   // Firebase Cloud Messaging (FCM) for notifications
-  // implementation("com.google.firebase:firebase-messaging")
+  implementation("com.google.firebase:firebase-messaging")
   
   // Core library desugaring
   coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
