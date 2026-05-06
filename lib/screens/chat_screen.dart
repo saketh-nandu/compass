@@ -14,6 +14,7 @@ import '../services/auth_service.dart';
 import '../services/memory_service.dart';
 import 'memories_screen.dart';
 import 'recordings_screen.dart';
+import 'shorts_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -47,7 +48,7 @@ class _ChatScreenState extends State<ChatScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     WidgetsBinding.instance.addObserver(this);
     _scrollController.addListener(_onScroll);
     _initializeChat();
@@ -826,6 +827,7 @@ class _ChatScreenState extends State<ChatScreen>
             Tab(icon: Icon(Icons.chat), text: 'Chat'),
             Tab(icon: Icon(Icons.photo_library), text: 'Memories'),
             Tab(icon: Icon(Icons.mic), text: 'Recordings'),
+            Tab(icon: Icon(Icons.video_library), text: 'Shorts'),
           ],
         ),
       ),
@@ -835,6 +837,7 @@ class _ChatScreenState extends State<ChatScreen>
           _buildChatTab(),
           const MemoriesScreen(),
           const RecordingsScreen(),
+          ShortsScreen(partnerId: _partnerId),
         ],
       ),
       floatingActionButton: _showScrollToBottomButton
