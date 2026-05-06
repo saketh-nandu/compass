@@ -35,6 +35,9 @@ jobs:
       - name: Get dependencies again
         run: flutter pub get
 
+      - name: Clean Gradle
+        run: cd android && ./gradlew clean && cd ..
+
       - name: Run analyzer
         run: flutter analyze
 
