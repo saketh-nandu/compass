@@ -23,12 +23,17 @@ class _UnlockScreenState extends State<UnlockScreen> {
   }
 
   Future<void> _handleLogin() async {
-    final id = _idController.text.trim();
+    var id = _idController.text.trim();
     final password = _passwordController.text.trim();
 
     if (id.isEmpty || password.isEmpty) {
       _showSnackBar('Please enter both ID and password');
       return;
+    }
+
+    // Convert username to email if needed
+    if (!id.contains('@')) {
+      id = '$id@example.com';
     }
 
     setState(() => _isLoading = true);
