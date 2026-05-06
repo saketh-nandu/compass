@@ -3,8 +3,9 @@
 -- Create storage buckets
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES 
-  ('chat-media', 'chat-media', false, 52428800, ARRAY['image/*', 'video/*', 'audio/*', 'application/*']),
+  ('chat-media', 'chat-media', true, 52428800, ARRAY['image/*', 'video/*', 'audio/*', 'application/*']),
   ('avatars', 'avatars', true, 2097152, ARRAY['image/*']),
+  ('recordings', 'recordings', true, 104857600, ARRAY['audio/*', 'video/*']),
   ('temp-uploads', 'temp-uploads', false, 52428800, ARRAY['*'])
 ON CONFLICT (id) DO NOTHING;
 
@@ -33,3 +34,16 @@ CREATE POLICY "Users can update their own avatar" ON storage.objects
 
 CREATE POLICY "Users can delete their own avatar" ON storage.objects
   FOR DELETE USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+-- Recordings bucket policies (public read)
+CREATE POLICY "Recordings are publicly accessible" ON storage.objects
+  FOR SELECT USING (bucket_id = 'recordings');
+
+CREATE POLICY "Users can upload their own recordings" ON storage.objects
+  FOR INSERT WITH CHECK (bucket_id = 'recordings' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+CREATE POLICY "Users can update their own recordings" ON storage.objects
+  FOR UPDATE USING (bucket_id = 'recordings' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+CREATE POLICY "Users can delete their own recordings" ON storage.objects
+  FOR DELETE USING (bucket_id = 'recordings' AND auth.uid()::text = (storage.foldername(name))[1]);

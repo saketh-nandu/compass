@@ -96,7 +96,11 @@ CREATE TABLE IF NOT EXISTS device_tokens (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   token TEXT NOT NULL UNIQUE,
+  platform TEXT CHECK (platform IN ('ios', 'android', 'web')),
   device_type TEXT CHECK (device_type IN ('ios', 'android', 'web')),
+  device_info JSONB DEFAULT '{}',
+  active BOOLEAN DEFAULT TRUE,
+  last_used_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -113,6 +117,20 @@ CREATE TABLE IF NOT EXISTS notification_preferences (
   vibration_enabled BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ============================================================================
+-- 7B. CREATE NOTIFICATION_LOGS TABLE (for tracking and cooldowns)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS notification_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  sender_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  recipient_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type TEXT NOT NULL CHECK (type IN ('partner_notification', 'chat_message', 'other')),
+  message TEXT,
+  success_count INTEGER DEFAULT 0,
+  total_count INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- ============================================================================
@@ -135,6 +153,9 @@ CREATE INDEX IF NOT EXISTS idx_recordings_created_at ON recordings(created_at DE
 
 CREATE INDEX IF NOT EXISTS idx_device_tokens_user_id ON device_tokens(user_id);
 
+CREATE INDEX IF NOT EXISTS idx_notification_logs_sender_recipient ON notification_logs(sender_user_id, recipient_user_id);
+CREATE INDEX IF NOT EXISTS idx_notification_logs_created_at ON notification_logs(created_at DESC);
+
 -- ============================================================================
 -- 9. ENABLE REALTIME FOR TABLES
 -- ============================================================================
@@ -155,6 +176,7 @@ ALTER TABLE memories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE recordings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE device_tokens ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notification_preferences ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notification_logs ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================================
 -- USERS TABLE POLICIES
@@ -280,6 +302,17 @@ CREATE POLICY "Users can update their own notification preferences"
 CREATE POLICY "Users can insert their own notification preferences"
   ON notification_preferences FOR INSERT
   WITH CHECK (auth.uid() = user_id);
+
+-- ============================================================================
+-- NOTIFICATION_LOGS TABLE POLICIES
+-- ============================================================================
+CREATE POLICY "Users can view their notification logs"
+  ON notification_logs FOR SELECT
+  USING (auth.uid() = sender_user_id OR auth.uid() = recipient_user_id);
+
+CREATE POLICY "Service role can insert notification logs"
+  ON notification_logs FOR INSERT
+  WITH CHECK (TRUE);
 
 -- ============================================================================
 -- 11. CREATE TEST USERS WITH CREDENTIALS

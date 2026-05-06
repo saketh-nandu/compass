@@ -1,16 +1,18 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/recording.dart';
+import 'storage_service.dart';
 
 class RecordingService {
   final SupabaseClient _supabase = Supabase.instance.client;
+  final StorageService _storageService = StorageService.instance;
 
-  /// Upload a recording
-  Future<Recording> uploadRecording({
-    required String recordingUrl,
+  /// Upload a recording with file
+  Future<Recording?> uploadRecording({
+    required File recordingFile,
     required String recipientId,
-    required String recordingType,
-    int? durationSeconds,
-    int? fileSize,
+    required String recordingType, // 'audio' or 'video'
     String? title,
     String? description,
   }) async {
@@ -18,6 +20,30 @@ class RecordingService {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('User not authenticated');
 
+      // Upload file to storage
+      String? recordingUrl;
+      if (recordingType == 'audio') {
+        recordingUrl = await _storageService.uploadAudioRecording(
+          audioFile: recordingFile,
+          userId: userId,
+          chatPartnerId: recipientId,
+        );
+      } else if (recordingType == 'video') {
+        recordingUrl = await _storageService.uploadVideoRecording(
+          videoFile: recordingFile,
+          userId: userId,
+          chatPartnerId: recipientId,
+        );
+      }
+
+      if (recordingUrl == null) {
+        throw Exception('Failed to upload recording file to storage');
+      }
+
+      // Get file size
+      final fileSize = recordingFile.lengthSync();
+
+      // Create recording record in database
       final response = await _supabase
           .from('recordings')
           .insert({
@@ -25,7 +51,6 @@ class RecordingService {
             'recipient_id': recipientId,
             'recording_url': recordingUrl,
             'recording_type': recordingType,
-            'duration_seconds': durationSeconds,
             'file_size': fileSize,
             'title': title,
             'description': description,
@@ -35,7 +60,8 @@ class RecordingService {
 
       return Recording.fromJson(response);
     } catch (e) {
-      throw Exception('Failed to upload recording: $e');
+      debugPrint('Upload recording error: $e');
+      return null;
     }
   }
 
@@ -58,7 +84,8 @@ class RecordingService {
 
       return (response as List).map((r) => Recording.fromJson(r)).toList();
     } catch (e) {
-      throw Exception('Failed to fetch my recordings: $e');
+      debugPrint('Get my recordings error: $e');
+      return [];
     }
   }
 
@@ -81,7 +108,8 @@ class RecordingService {
 
       return (response as List).map((r) => Recording.fromJson(r)).toList();
     } catch (e) {
-      throw Exception('Failed to fetch partner recordings: $e');
+      debugPrint('Get partner recordings error: $e');
+      return [];
     }
   }
 
@@ -91,7 +119,7 @@ class RecordingService {
       await _supabase.from('recordings').update(
           {'read_at': DateTime.now().toIso8601String()}).eq('id', recordingId);
     } catch (e) {
-      throw Exception('Failed to mark recording as read: $e');
+      debugPrint('Mark recording as read error: $e');
     }
   }
 
@@ -112,7 +140,8 @@ class RecordingService {
 
       return (response as List).length;
     } catch (e) {
-      throw Exception('Failed to get unread recordings count: $e');
+      debugPrint('Get unread recordings count error: $e');
+      return 0;
     }
   }
 
@@ -121,28 +150,7 @@ class RecordingService {
     try {
       await _supabase.from('recordings').delete().eq('id', recordingId);
     } catch (e) {
-      throw Exception('Failed to delete recording: $e');
-    }
-  }
-
-  /// Upload recording file to storage
-  Future<String> uploadRecordingFile({
-    required String filePath,
-    required String fileName,
-    required String recordingType,
-  }) async {
-    try {
-      final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) throw Exception('User not authenticated');
-
-      final storagePath = 'recordings/$userId/$recordingType/$fileName';
-
-      // Note: In a real implementation, you would read the file from filePath
-      // For now, we'll just return a placeholder URL
-      final publicUrl = storagePath;
-      return publicUrl;
-    } catch (e) {
-      throw Exception('Failed to upload recording file: $e');
+      debugPrint('Delete recording error: $e');
     }
   }
 
@@ -164,7 +172,8 @@ class RecordingService {
         return filtered.map((r) => Recording.fromJson(r)).toList();
       });
     } catch (e) {
-      throw Exception('Failed to stream my recordings: $e');
+      debugPrint('Stream my recordings error: $e');
+      return Stream.value([]);
     }
   }
 
@@ -186,7 +195,8 @@ class RecordingService {
         return filtered.map((r) => Recording.fromJson(r)).toList();
       });
     } catch (e) {
-      throw Exception('Failed to stream partner recordings: $e');
+      debugPrint('Stream partner recordings error: $e');
+      return Stream.value([]);
     }
   }
 }

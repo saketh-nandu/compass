@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../models/message.dart';
 import '../models/chat_user.dart';
 import 'supabase_service.dart';
+import 'storage_service.dart';
 
 /// Chat service that reuses the exact same backend logic as Chatsusa website
 ///
@@ -53,7 +54,7 @@ class ChatService {
   }
 
   /// Send a media message (image, video, audio, file)
-  /// Reuses the same Supabase Storage buckets as Chatsusa
+  /// Uses StorageService to upload files to appropriate buckets
   Future<Message?> sendMediaMessage({
     required String filePath,
     required String fileName,
@@ -66,21 +67,43 @@ class ChatService {
       final currentUser = _client.auth.currentUser;
       if (currentUser == null) throw Exception('User not authenticated');
 
-      // Upload file to the same storage bucket as Chatsusa
-      final fileExt = fileName.split('.').last;
-      final storagePath =
-          '${currentUser.id}/${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+      final file = File(filePath);
+      String? mediaUrl;
 
-      await _client.storage
-          .from('chat-files') // Same bucket as Chatsusa (from CSV data)
-          .upload(storagePath, File(filePath));
+      // Upload file using StorageService based on message type
+      if (messageType == 'image') {
+        mediaUrl = await StorageService.instance.uploadChatImage(
+          imageFile: file,
+          userId: currentUser.id,
+          chatPartnerId: receiverId,
+        );
+      } else if (messageType == 'video') {
+        mediaUrl = await StorageService.instance.uploadChatVideo(
+          videoFile: file,
+          userId: currentUser.id,
+          chatPartnerId: receiverId,
+        );
+      } else if (messageType == 'audio') {
+        mediaUrl = await StorageService.instance.uploadAudioRecording(
+          audioFile: file,
+          userId: currentUser.id,
+          chatPartnerId: receiverId,
+        );
+      } else {
+        // Generic file upload
+        mediaUrl = await StorageService.instance.uploadFile(
+          file: file,
+          userId: currentUser.id,
+          chatPartnerId: receiverId,
+          fileType: messageType,
+        );
+      }
 
-      // Get public URL
-      final mediaUrl =
-          _client.storage.from('chat-files').getPublicUrl(storagePath);
+      if (mediaUrl == null) {
+        throw Exception('Failed to upload media file');
+      }
 
       // Get file size
-      final file = File(filePath);
       final fileSize = await file.length();
 
       // Create message with media
