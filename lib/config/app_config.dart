@@ -8,20 +8,29 @@ class AppConfig {
   // ============================================================================
 
   /// Supabase project URL
-  /// Fresh Compass project URL
-  static const String supabaseUrl = 'https://mveocemlkrxdvpcdpuvh.supabase.co';
+  /// IMPORTANT: Set via environment variable SUPABASE_URL
+  static const String supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: 'https://your-project.supabase.co',
+  );
 
   /// Supabase anon key
-  /// Fresh Compass project anon key
-  static const String supabaseAnonKey =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12ZW9jZW1sa3J4ZHZwY2RwdXZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODQyNDgsImV4cCI6MjA5MzY2MDI0OH0.TpbEvmxDUgV3RnGNcGLqtOXff37WnyYYZzKgtTyheTQ';
+  /// IMPORTANT: Set via environment variable SUPABASE_ANON_KEY
+  static const String supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+    defaultValue: 'your-anon-key-here',
+  );
 
   // ============================================================================
   // YOUTUBE API CONFIGURATION
   // ============================================================================
 
   /// YouTube Data API v3 key for fetching shorts
-  static const String youtubeApiKey = 'AIzaSyC9D5SNyxywyjmCViQIBR7dxTEkQqI-G2U';
+  /// IMPORTANT: Set via environment variable YOUTUBE_API_KEY
+  static const String youtubeApiKey = String.fromEnvironment(
+    'YOUTUBE_API_KEY',
+    defaultValue: 'your-youtube-api-key-here',
+  );
 
   /// YouTube API base URL
   static const String youtubeApiBaseUrl =

@@ -18,10 +18,11 @@ class NotificationService {
 
   NotificationService._();
 
-  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  late FirebaseMessaging _messaging;
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
 
+  bool _firebaseInitialized = false;
   String? _deviceToken;
   String? get deviceToken => _deviceToken;
 
@@ -31,10 +32,13 @@ class NotificationService {
       // Initialize Firebase (optional - app works without it)
       try {
         await Firebase.initializeApp();
+        _messaging = FirebaseMessaging.instance;
+        _firebaseInitialized = true;
         debugPrint('Firebase initialized successfully');
       } catch (e) {
         debugPrint('Firebase initialization skipped: $e');
         debugPrint('App will work without push notifications');
+        _firebaseInitialized = false;
         return; // Exit early if Firebase fails
       }
 
@@ -59,18 +63,24 @@ class NotificationService {
 
   /// Request notification permissions
   Future<void> _requestPermissions() async {
-    final settings = await _messaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
+    if (!_firebaseInitialized) return;
 
-    debugPrint(
-        'Notification permission status: ${settings.authorizationStatus}');
+    try {
+      final settings = await _messaging.requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true,
+      );
+
+      debugPrint(
+          'Notification permission status: ${settings.authorizationStatus}');
+    } catch (e) {
+      debugPrint('Request permissions error: $e');
+    }
   }
 
   /// Initialize local notifications for foreground display
@@ -97,6 +107,11 @@ class NotificationService {
   /// Get device token and store in Supabase
   Future<void> _getDeviceToken() async {
     try {
+      if (!_firebaseInitialized) {
+        debugPrint('Firebase not initialized, skipping device token');
+        return;
+      }
+
       if (kIsWeb) {
         debugPrint('Device token not supported on web platform');
         return;
@@ -143,21 +158,37 @@ class NotificationService {
 
   /// Set up message handlers for different app states
   void _setupMessageHandlers() {
-    // Handle messages when app is in foreground
-    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+    if (!_firebaseInitialized) {
+      debugPrint('Firebase not initialized, skipping message handlers');
+      return;
+    }
 
-    // Handle messages when app is opened from background
-    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageOpenedApp);
+    try {
+      // Handle messages when app is in foreground
+      FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
 
-    // Handle messages when app is opened from terminated state
-    _handleInitialMessage();
+      // Handle messages when app is opened from background
+      FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageOpenedApp);
+
+      // Handle messages when app is opened from terminated state
+      _handleInitialMessage();
+    } catch (e) {
+      debugPrint('Setup message handlers error: $e');
+    }
   }
 
   /// Handle initial message when app is opened from terminated state
   Future<void> _handleInitialMessage() async {
-    final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
-    if (initialMessage != null) {
-      _handleMessageOpenedApp(initialMessage);
+    if (!_firebaseInitialized) return;
+
+    try {
+      final initialMessage =
+          await FirebaseMessaging.instance.getInitialMessage();
+      if (initialMessage != null) {
+        _handleMessageOpenedApp(initialMessage);
+      }
+    } catch (e) {
+      debugPrint('Handle initial message error: $e');
     }
   }
 
@@ -247,6 +278,11 @@ class NotificationService {
     String? customMessage,
   }) async {
     try {
+      if (!_firebaseInitialized) {
+        debugPrint('Firebase not initialized, cannot send notifications');
+        return false;
+      }
+
       final currentUser = SupabaseService.instance.currentUser;
       if (currentUser == null) return false;
 
@@ -310,10 +346,10 @@ class NotificationService {
   /// Remove device token on logout
   Future<void> removeDeviceToken() async {
     try {
-      if (_deviceToken != null) {
-        await SupabaseService.instance.removeDeviceToken(_deviceToken!);
-        _deviceToken = null;
-      }
+      if (!_firebaseInitialized || _deviceToken == null) return;
+
+      await SupabaseService.instance.removeDeviceToken(_deviceToken!);
+      _deviceToken = null;
     } catch (e) {
       debugPrint('Remove device token error: $e');
     }
@@ -322,6 +358,11 @@ class NotificationService {
   /// Subscribe to topic (for broadcast notifications)
   Future<void> subscribeToTopic(String topic) async {
     try {
+      if (!_firebaseInitialized) {
+        debugPrint('Firebase not initialized, cannot subscribe to topics');
+        return;
+      }
+
       await _messaging.subscribeToTopic(topic);
       debugPrint('Subscribed to topic: $topic');
     } catch (e) {
@@ -332,6 +373,11 @@ class NotificationService {
   /// Unsubscribe from topic
   Future<void> unsubscribeFromTopic(String topic) async {
     try {
+      if (!_firebaseInitialized) {
+        debugPrint('Firebase not initialized, cannot unsubscribe from topics');
+        return;
+      }
+
       await _messaging.unsubscribeFromTopic(topic);
       debugPrint('Unsubscribed from topic: $topic');
     } catch (e) {
