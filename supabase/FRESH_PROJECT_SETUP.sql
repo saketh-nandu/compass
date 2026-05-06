@@ -163,10 +163,10 @@ CREATE INDEX IF NOT EXISTS idx_notification_logs_created_at ON public.notificati
 -- ============================================================================
 -- 11. ENABLE REALTIME
 -- ============================================================================
-ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.typing_indicators;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.users;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.recordings;
+ALTER PUBLICATION supabase_realtime ADD TABLE IF NOT EXISTS public.messages;
+ALTER PUBLICATION supabase_realtime ADD TABLE IF NOT EXISTS public.typing_indicators;
+ALTER PUBLICATION supabase_realtime ADD TABLE IF NOT EXISTS public.users;
+ALTER PUBLICATION supabase_realtime ADD TABLE IF NOT EXISTS public.recordings;
 
 -- ============================================================================
 -- 12. ENABLE ROW LEVEL SECURITY
