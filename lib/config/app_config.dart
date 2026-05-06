@@ -1,3 +1,5 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 /// Application configuration
 ///
 /// IMPORTANT: Update these values with your actual Chatsusa project credentials
@@ -8,29 +10,26 @@ class AppConfig {
   // ============================================================================
 
   /// Supabase project URL
-  /// IMPORTANT: Set via environment variable SUPABASE_URL
-  static const String supabaseUrl = String.fromEnvironment(
-    'SUPABASE_URL',
-    defaultValue: 'https://your-project.supabase.co',
-  );
+  /// Loaded from .env file at runtime
+  static String get supabaseUrl {
+    return dotenv.env['SUPABASE_URL'] ?? 'https://your-project.supabase.co';
+  }
 
   /// Supabase anon key
-  /// IMPORTANT: Set via environment variable SUPABASE_ANON_KEY
-  static const String supabaseAnonKey = String.fromEnvironment(
-    'SUPABASE_ANON_KEY',
-    defaultValue: 'your-anon-key-here',
-  );
+  /// Loaded from .env file at runtime
+  static String get supabaseAnonKey {
+    return dotenv.env['SUPABASE_ANON_KEY'] ?? 'your-anon-key-here';
+  }
 
   // ============================================================================
   // YOUTUBE API CONFIGURATION
   // ============================================================================
 
   /// YouTube Data API v3 key for fetching shorts
-  /// IMPORTANT: Set via environment variable YOUTUBE_API_KEY
-  static const String youtubeApiKey = String.fromEnvironment(
-    'YOUTUBE_API_KEY',
-    defaultValue: 'your-youtube-api-key-here',
-  );
+  /// Loaded from .env file at runtime
+  static String get youtubeApiKey {
+    return dotenv.env['YOUTUBE_API_KEY'] ?? 'your-youtube-api-key-here';
+  }
 
   /// YouTube API base URL
   static const String youtubeApiBaseUrl =

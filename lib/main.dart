@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'services/supabase_service.dart';
 import 'services/notification_service.dart';
 import 'theme.dart' as app_theme;
@@ -8,6 +9,7 @@ import 'nav.dart';
 /// Main entry point for the application
 ///
 /// This sets up:
+/// - Environment variables from .env file
 /// - Supabase backend integration (same as Chatsusa website)
 /// - Firebase Cloud Messaging for notifications
 /// - Provider state management
@@ -15,6 +17,13 @@ import 'nav.dart';
 /// - Material 3 theming with light/dark modes
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    // Load environment variables from .env file
+    await dotenv.load(fileName: '.env');
+  } catch (e) {
+    debugPrint('Error loading .env file: $e');
+  }
 
   try {
     // Initialize Supabase (same project as Chatsusa website)
