@@ -14,13 +14,12 @@
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  username TEXT UNIQUE NOT NULL,
   email TEXT UNIQUE NOT NULL,
-  full_name TEXT,
+  display_name TEXT,
   avatar_url TEXT,
-  gender TEXT CHECK (gender IN ('male', 'female', 'other')),
   status TEXT DEFAULT 'offline' CHECK (status IN ('online', 'offline', 'away')),
   last_seen_at TIMESTAMP WITH TIME ZONE,
+  metadata JSONB DEFAULT '{}',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

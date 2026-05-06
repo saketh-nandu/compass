@@ -1,0 +1,117 @@
+================================================================================
+FIX LOGIN ERROR - "Database error querying schema" (500)
+================================================================================
+
+The error is likely caused by RLS (Row Level Security) policies blocking access.
+
+================================================================================
+STEP 1: RUN DIAGNOSTIC SCRIPT
+================================================================================
+
+1. Go to Supabase Dashboard → SQL Editor
+2. Click "New query"
+3. Copy and paste the content from: supabase/diagnose_issue.sql
+4. Click "Run"
+5. Check the results - look for:
+   - users_table_exists: should be true
+   - users table structure: should show columns
+   - rowsecurity: should be true or false
+   - auth_users_count: should show number of users
+
+================================================================================
+STEP 2: DISABLE RLS TEMPORARILY (FOR TESTING)
+================================================================================
+
+1. Go to Supabase Dashboard → SQL Editor
+2. Click "New query"
+3. Copy and paste this SQL:
+
+ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.messages DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.typing_indicators DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.memories DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.recordings DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.device_tokens DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notification_preferences DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notification_logs DISABLE ROW LEVEL SECURITY;
+
+4. Click "Run"
+5. Now try to login in the app
+6. If login works, the issue is RLS policies
+7. If login still fails, the issue is something else
+
+================================================================================
+STEP 3: IF LOGIN WORKS (RLS WAS THE ISSUE)
+================================================================================
+
+1. Go to Supabase Dashboard → SQL Editor
+2. Click "New query"
+3. Copy and paste the content from: supabase/fix_rls_policies.sql
+4. Click "Run"
+5. This will re-enable RLS with correct policies
+6. Try login again - should work now
+
+================================================================================
+STEP 4: IF LOGIN STILL FAILS
+================================================================================
+
+Check these things:
+
+1. Verify users exist in auth.users:
+   SELECT id, email FROM auth.users;
+
+2. Verify users exist in public.users:
+   SELECT id, email, display_name FROM public.users;
+
+3. Check if there are any errors in Supabase logs:
+   - Go to Supabase Dashboard
+   - Click "Logs" in left sidebar
+   - Look for recent errors
+
+4. Try creating a new user via sign-up instead:
+   - In the app, try to sign up with a new email
+   - This will create a user in auth.users
+   - The trigger should create a profile in public.users
+
+================================================================================
+QUICK FIX (COPY-PASTE)
+================================================================================
+
+Run this in SQL Editor to disable RLS:
+
+ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.messages DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.typing_indicators DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.memories DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.recordings DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.device_tokens DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notification_preferences DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notification_logs DISABLE ROW LEVEL SECURITY;
+
+Then try login. If it works, run this to fix RLS:
+
+-- Users table
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view their own profile" ON public.users;
+DROP POLICY IF EXISTS "Users can view all profiles" ON public.users;
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.users;
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.users;
+
+CREATE POLICY "Users can view all profiles" ON public.users FOR SELECT USING (TRUE);
+CREATE POLICY "Users can view their own profile" ON public.users FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Users can update their own profile" ON public.users FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can insert their own profile" ON public.users FOR INSERT WITH CHECK (auth.uid() = id);
+
+-- Messages table
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view messages they sent or received" ON public.messages;
+DROP POLICY IF EXISTS "Users can insert messages they send" ON public.messages;
+DROP POLICY IF EXISTS "Users can update messages they sent" ON public.messages;
+DROP POLICY IF EXISTS "Users can delete messages they sent" ON public.messages;
+
+CREATE POLICY "Users can view messages they sent or received" ON public.messages FOR SELECT USING (auth.uid() = sender_id OR auth.uid() = recipient_id);
+CREATE POLICY "Users can insert messages they send" ON public.messages FOR INSERT WITH CHECK (auth.uid() = sender_id);
+CREATE POLICY "Users can update messages they sent" ON public.messages FOR UPDATE USING (auth.uid() = sender_id);
+CREATE POLICY "Users can delete messages they sent" ON public.messages FOR DELETE USING (auth.uid() = sender_id);
+
+================================================================================

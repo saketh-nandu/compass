@@ -9,12 +9,12 @@ class AppConfig {
 
   /// Supabase project URL
   /// Fresh Compass project URL
-  static const String supabaseUrl = 'https://oltzkkchoohpwbipqkeh.supabase.co';
+  static const String supabaseUrl = 'https://mveocemlkrxdvpcdpuvh.supabase.co';
 
   /// Supabase anon key
   /// Fresh Compass project anon key
   static const String supabaseAnonKey =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9sdHpra2Nob29ocHdiaXBxa2VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNTI3MTQsImV4cCI6MjA5MzYyODcxNH0.pBZG5J3gb4cmGnLerT5krEYh2zTfXe4C6C_OjB3wxfA';
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12ZW9jZW1sa3J4ZHZwY2RwdXZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODQyNDgsImV4cCI6MjA5MzY2MDI0OH0.TpbEvmxDUgV3RnGNcGLqtOXff37WnyYYZzKgtTyheTQ';
 
   // ============================================================================
   // STORAGE BUCKET NAMES (MUST MATCH CHATSUSA WEBSITE)

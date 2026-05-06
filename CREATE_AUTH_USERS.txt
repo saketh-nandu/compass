@@ -1,0 +1,127 @@
+================================================================================
+HOW TO CREATE TEST USERS IN SUPABASE AUTH
+================================================================================
+
+The error "Database error querying schema" (500) typically means:
+1. User doesn't exist in auth.users table
+2. User profile doesn't exist in public.users table
+3. RLS policies are blocking access
+
+================================================================================
+METHOD 1: CREATE USERS VIA SUPABASE DASHBOARD (EASIEST)
+================================================================================
+
+1. Go to: https://app.supabase.com
+2. Select your project
+3. Go to: Authentication → Users
+4. Click "Add user"
+5. Enter email: saketh_nandu127@example.com
+6. Enter password: SupriyaSaketh127
+7. Click "Create user"
+8. Repeat for second user:
+   - Email: srirenu127@example.com
+   - Password: #filmmaking
+
+================================================================================
+METHOD 2: CREATE USERS VIA SUPABASE CLI
+================================================================================
+
+Note: The Supabase CLI may not have a direct user creation command in older versions.
+If the command doesn't work, use METHOD 1 (Dashboard).
+
+Try:
+  supabase auth admin create-user --email saketh_nandu127@example.com --password SupriyaSaketh127
+  supabase auth admin create-user --email srirenu127@example.com --password #filmmaking
+
+================================================================================
+METHOD 3: CREATE USERS VIA SQL (AFTER AUTH USERS EXIST)
+================================================================================
+
+After creating users in auth.users (via Dashboard or CLI), run this SQL:
+
+-- In Supabase SQL Editor, run:
+
+INSERT INTO public.users (id, email, display_name, username, status)
+SELECT 
+  id,
+  email,
+  COALESCE(raw_user_meta_data->>'display_name', split_part(email, '@', 1)),
+  split_part(email, '@', 1),
+  'offline'
+FROM auth.users
+WHERE email IN ('saketh_nandu127@example.com', 'srirenu127@example.com')
+ON CONFLICT (id) DO NOTHING;
+
+================================================================================
+VERIFY USERS WERE CREATED
+================================================================================
+
+Run this SQL to verify:
+
+-- Check auth.users table
+SELECT id, email, created_at FROM auth.users 
+WHERE email IN ('saketh_nandu127@example.com', 'srirenu127@example.com');
+
+-- Check public.users table
+SELECT id, email, display_name, username, status FROM public.users 
+WHERE email IN ('saketh_nandu127@example.com', 'srirenu127@example.com');
+
+Both queries should return 2 rows each.
+
+================================================================================
+TEST LOGIN
+================================================================================
+
+After users are created:
+
+1. Open the app
+2. Go to login screen
+3. Enter:
+   - ID: saketh_nandu127 (or saketh_nandu127@example.com)
+   - Password: SupriyaSaketh127
+4. Click "Sign In"
+5. Should see "✓ Login successful!"
+
+================================================================================
+IF LOGIN STILL FAILS
+================================================================================
+
+Check these things:
+
+1. Verify users exist in auth.users:
+   SELECT COUNT(*) FROM auth.users WHERE email = 'saketh_nandu127@example.com';
+   
+2. Verify users exist in public.users:
+   SELECT COUNT(*) FROM public.users WHERE email = 'saketh_nandu127@example.com';
+   
+3. Check RLS policies on users table:
+   SELECT policyname FROM pg_policies WHERE tablename = 'users';
+   
+4. Check if there are any errors in Supabase logs:
+   - Go to Supabase Dashboard
+   - Click "Logs" in left sidebar
+   - Look for authentication errors
+
+5. Try signing up instead of signing in:
+   - This will create a new user in auth.users
+   - The trigger should create a profile in public.users
+
+================================================================================
+QUICK STEPS TO FIX
+================================================================================
+
+1. Go to Supabase Dashboard: https://app.supabase.com
+2. Select your project
+3. Go to: Authentication → Users
+4. Click "Add user"
+5. Create first user:
+   Email: saketh_nandu127@example.com
+   Password: SupriyaSaketh127
+6. Create second user:
+   Email: srirenu127@example.com
+   Password: #filmmaking
+7. Go to SQL Editor
+8. Run the INSERT query above to create profiles
+9. Test login in the app
+
+================================================================================

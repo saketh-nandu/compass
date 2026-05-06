@@ -1,0 +1,8 @@
+-- Disable RLS on tables that exist
+ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.messages DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.typing_indicators DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.memories DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.recordings DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.device_tokens DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notification_preferences DISABLE ROW LEVEL SECURITY;
