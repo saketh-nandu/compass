@@ -1,0 +1,26 @@
+-- ============================================================================
+-- CREATE TEST USERS
+-- ============================================================================
+-- This migration creates test users via SQL
+-- Note: Users must be created via Supabase Dashboard or CLI
+-- This file documents the process
+-- ============================================================================
+
+-- The users will be created via CLI with these commands:
+-- 
+-- supabase auth admin create-user \
+--   --email saketh_nandu127@example.com \
+--   --password SupriyaSaketh127 \
+--   --autoconfirm
+--
+-- supabase auth admin create-user \
+--   --email srirenu127@example.com \
+--   --password '#filmmaking' \
+--   --autoconfirm
+--
+-- After users are created, their profiles will be automatically created
+-- by the trigger: on_auth_user_created
+
+-- ============================================================================
+-- END OF MIGRATION
+-- ============================================================================

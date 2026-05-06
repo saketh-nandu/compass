@@ -1,0 +1,95 @@
+================================================================================
+COMPASS APP - QUICK BACKEND SETUP
+================================================================================
+
+STEP 1: DEPLOY DATABASE
+================================================================================
+cd my_app
+supabase link --project-ref oltzkkchoohpwbipqkeh
+supabase db push
+
+STEP 2: CREATE TEST USERS (via Supabase Dashboard)
+================================================================================
+Go to: https://app.supabase.com/project/oltzkkchoohpwbipqkeh/auth/users
+
+Add User 1 (Male):
+  Email: saketh_nandu127@example.com
+  Password: SupriyaSaketh127
+  ✓ Auto confirm user
+
+Add User 2 (Female):
+  Email: srirenu127@example.com
+  Password: #filmmaking
+  ✓ Auto confirm user
+
+STEP 3: INSERT USER PROFILES
+================================================================================
+supabase db execute < supabase/setup_users.sql
+
+STEP 4: TEST IN APP
+================================================================================
+Login with:
+  Male:
+    ID: saketh_nandu127@example.com
+    Password: SupriyaSaketh127
+
+  Female:
+    ID: srirenu127@example.com
+    Password: #filmmaking
+
+================================================================================
+DATABASE TABLES CREATED
+================================================================================
+✓ users - User profiles
+✓ messages - Chat messages with read status
+✓ typing_indicators - Real-time typing status
+✓ memories - Saved memories
+✓ recordings - Audio/video recordings
+✓ device_tokens - Push notification tokens
+✓ notification_preferences - User settings
+
+================================================================================
+REALTIME ENABLED
+================================================================================
+✓ messages - See new messages instantly
+✓ typing_indicators - See typing status
+✓ users - See online/offline status
+✓ recordings - See new recordings
+
+================================================================================
+SECURITY CONFIGURED
+================================================================================
+✓ Row Level Security (RLS) on all tables
+✓ Users can only access their own data
+✓ Messages visible only to sender/recipient
+✓ Typing indicators visible to both partners
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+If users don't appear:
+  1. Check users created in auth.users table
+  2. Verify user profiles in users table
+  3. Check RLS policies allow access
+
+If realtime doesn't work:
+  1. Verify realtime enabled in dashboard
+  2. Check tables in supabase_realtime publication
+  3. Check anon key permissions
+
+If login fails:
+  1. Verify email matches exactly
+  2. Check password is correct
+  3. Ensure user is auto-confirmed
+
+================================================================================
+DOCUMENTATION
+================================================================================
+- SUPABASE_SETUP_GUIDE.md - Detailed setup instructions
+- BACKEND_SETUP_SUMMARY.md - Complete summary
+- lib/config/app_config.dart - App configuration
+- lib/services/auth_service.dart - Authentication
+- lib/services/chat_service.dart - Chat functionality
+
+================================================================================

@@ -21,6 +21,8 @@ class _CompassScreenState extends State<CompassScreen>
   DateTime? _lastTapTime;
   late AnimationController _rotationController;
   late Animation<double> _rotationAnimation;
+  DateTime? _unlockStartTime; // Track when user reaches 127°
+  bool _isUnlocking = false; // Prevent multiple unlock attempts
 
   @override
   void initState() {
@@ -101,8 +103,8 @@ class _CompassScreenState extends State<CompassScreen>
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('✓ Manual mode activated! Rotate freely to 127°'),
-          duration: Duration(seconds: 2),
+          content: Text('Manual Mode'),
+          duration: Duration(seconds: 1),
         ),
       );
     }
@@ -139,21 +141,26 @@ class _CompassScreenState extends State<CompassScreen>
         (angle >= targetAngle - tolerance && angle <= targetAngle + tolerance);
 
     if (isAtTarget) {
-      _unlockChat();
+      // Start tracking time when user reaches 127°
+      _unlockStartTime ??= DateTime.now();
+
+      // Check if user has held at 127° for 3 seconds
+      final elapsedSeconds =
+          DateTime.now().difference(_unlockStartTime!).inSeconds;
+      if (elapsedSeconds >= 3 && !_isUnlocking) {
+        _unlockChat();
+      }
+    } else {
+      // Reset unlock timer if user moves away from 127°
+      _unlockStartTime = null;
     }
   }
 
   void _unlockChat() {
-    // Show success feedback
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('✓ Unlocked! Opening chat...'),
-        duration: Duration(milliseconds: 300),
-      ),
-    );
+    if (_isUnlocking) return; // Prevent multiple unlock attempts
+    _isUnlocking = true;
 
-    // Navigate to unlock screen immediately
+    // Navigate to unlock screen
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
         context.push('/unlock');
@@ -231,40 +238,14 @@ class _CompassScreenState extends State<CompassScreen>
                     ),
               ),
 
-              // Mode indicator
+              // Manual mode indicator
               if (_manualMode) ...[
                 const SizedBox(height: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: isNearUnlock
-                        ? Theme.of(context).colorScheme.tertiaryContainer
-                        : Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    isNearUnlock
-                        ? '🔓 UNLOCK ZONE! (127°)'
-                        : '🎯 Manual Mode - Rotate to 127°',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: isNearUnlock
-                              ? Theme.of(context)
-                                  .colorScheme
-                                  .onTertiaryContainer
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                ),
-              ] else ...[
-                const SizedBox(height: 8),
                 Text(
-                  'Tap 5 times to activate manual mode',
+                  'Manual Mode',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w600,
                       ),
                 ),
               ],
@@ -423,35 +404,6 @@ class _CompassScreenState extends State<CompassScreen>
                   },
                 ),
               ),
-
-              const SizedBox(height: 32),
-
-              // Instructions
-              if (_manualMode) ...[
-                Text(
-                  'Drag to rotate • Reach 127° to unlock',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-              ] else if (_hasPermissions) ...[
-                Text(
-                  'Tap 5 times quickly to enable manual mode',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-              ] else ...[
-                Text(
-                  'Compass not available on this device',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
             ],
           ),
         ),
